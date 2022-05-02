@@ -20,8 +20,18 @@
         <p class="card-text">
           Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a>
         </p>
+       
       </div>
-      <div class="card-footer text-muted"></div>
+      <div class="card-footer text-muted">
+        <h3>Edit</h3>
+        <form action="/urls/<%= shortURL %>" method="POST">
+          <label for="longURL">New URL:</label>
+          <input type="text" placeholder="https://" name="longURL" id="longURL">
+          <button class="btn btn-primary btn-sm">Submit</button>
+        </form>
+      </div>
+      
+      </form>
     </div>
     <!-- Bootstrap JS -->
     <script
