@@ -44,13 +44,14 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  res.render('urls_new', { username: req.cookies['username'] });
 });
 
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
+    username: req.cookies['username'],
   };
   res.render('urls_show', templateVars);
 });
