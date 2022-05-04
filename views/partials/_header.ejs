@@ -19,9 +19,11 @@
       </div>
     </div>
     <% if (!user) { %>
-    <form action="/login" method="POST">
-      <input type="text" name="username" id="username" placeholder="Username" />
-      <button class="btn btn-primary btn-sm">Login</button>
+    <form action="/login" method="get">
+      <button class="btn btn-primary m-1">Login</button>
+    </form>
+    <form action="/register" method="get">
+      <button class="btn btn-primary">Register</button>
     </form>
     <% } else { %>
     <form action="/logout" method="POST">
