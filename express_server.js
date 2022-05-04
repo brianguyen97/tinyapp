@@ -4,7 +4,9 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
 
+app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
@@ -67,6 +69,12 @@ const checkIfUserExists = email => {
   return true;
 };
 
+// Check if password is correct
+const verifyPassword = (user, password) => {
+  if (user.password === password) return true;
+  return false;
+};
+
 // Homepage
 app.get('/', (req, res) => {
   res.send('Hello!');
@@ -95,10 +103,12 @@ app.post('/register', (req, res) => {
 });
 
 // login
-app.post('/login', (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
-  res.redirect('/urls');
+app.get('/login', (req, res) => {
+  const templateVars = {
+    userID: req.cookies['user_id'],
+    user: users[req.cookies['user_id']],
+  };
+  res.render('login', templateVars);
 });
 
 // logout
