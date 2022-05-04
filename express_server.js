@@ -63,10 +63,10 @@ const createNewUser = (req, res) => {
 const checkIfUserExists = email => {
   for (let user in users) {
     if (users[user].email === email) {
-      return false;
+      return users[user];
     }
   }
-  return true;
+  return false;
 };
 
 // Check if password is correct
@@ -92,7 +92,7 @@ app.get('/register', (req, res) => {
 // register post
 app.post('/register', (req, res) => {
   const exists = checkIfUserExists(req.body.email);
-  if (!exists) {
+  if (exists) {
     res.status(400).send('Email is already in use.');
   } else {
     const newUser = createNewUser(req, res);
@@ -109,6 +109,26 @@ app.get('/login', (req, res) => {
     user: users[req.cookies['user_id']],
   };
   res.render('login', templateVars);
+});
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  const user = checkIfUserExists(email);
+  const verifyPw = verifyPassword(user, password);
+  if (user) {
+    if (verifyPw) {
+      res.cookie('user_id', user.id);
+      res.redirect('/urls');
+    } else {
+      res.status(403).send('Invalid login credentials. Please try again.');
+    }
+  } else {
+    res
+      .status(403)
+      .send(
+        'No account has been created with this e-mail. Please register for an account.'
+      );
+  }
 });
 
 // logout
