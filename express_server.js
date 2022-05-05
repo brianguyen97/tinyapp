@@ -147,6 +147,7 @@ app.get('/urls', (req, res) => {
     userID: req.cookies['user_id'],
     user: users[req.cookies['user_id']],
   };
+  console.log(users[req.cookies['user_id']]);
   res.render('urls_index', templateVars);
 });
 
