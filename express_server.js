@@ -17,8 +17,8 @@ app.listen(8080, () => {
 
 // URL Database
 const urlDatabase = {
-  b2xVn2: 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com',
+  b2xVn2: 'https://www.billieeilish.com',
+  '9sm5xK': 'http://www.google.ca',
 };
 
 // Users Database
@@ -195,3 +195,5 @@ app.post('/urls/:shortURL', (req, res) => {
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
+
+// TEST
