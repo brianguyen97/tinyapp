@@ -196,5 +196,3 @@ app.post('/urls/:shortURL', (req, res) => {
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
-
-// TEST
