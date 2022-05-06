@@ -17,15 +17,34 @@ app.listen(8080, () => {
 
 // URL Database
 const urlDatabase = {
-  b2xVn2: 'https://www.billieeilish.com',
-  '9sm5xK': 'http://www.google.ca',
+  b6UTxQ: {
+    longURL: 'https://www.tsn.ca',
+    userID: 'billieEilish',
+  },
+  i3BoGr: {
+    longURL: 'https://www.google.ca',
+    userID: 'billieEilish',
+  },
+  i3BoXr: {
+    longURL: 'https://www.instagram.com',
+    userID: 'blohsh',
+  },
+  m3x4G: {
+    longURL: 'https://www.facebook.com',
+    userID: 'blohsh',
+  },
 };
 
 // Users Database
 const users = {
   billieEilish: {
     id: 'billieEilish',
-    email: 'billieEilish@gmail.com',
+    email: 'billieeilish@gmail.com',
+    password: 'blohsh',
+  },
+  blohsh: {
+    id: 'blohsh',
+    email: 'blohsh@gmail.com',
     password: 'blohsh',
   },
 };
@@ -75,6 +94,17 @@ const verifyPassword = (user, password) => {
   return false;
 };
 
+// fetch urls by user ID
+const urlsForUser = userid => {
+  let accumulator = {};
+  for (url in urlDatabase) {
+    if (urlDatabase[url].userID === userid) {
+      accumulator[url] = urlDatabase[url];
+    }
+  }
+  return accumulator;
+};
+
 // Homepage
 app.get('/', (req, res) => {
   res.send('Hello!');
@@ -102,7 +132,7 @@ app.post('/register', (req, res) => {
   }
 });
 
-// login
+// login page
 app.get('/login', (req, res) => {
   const templateVars = {
     userID: req.cookies['user_id'],
@@ -111,6 +141,7 @@ app.get('/login', (req, res) => {
   res.render('login', templateVars);
 });
 
+// login
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   const user = checkIfUserExists(email);
@@ -142,13 +173,17 @@ app.get('/urls.json', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
+  const urls = urlsForUser(req.cookies['user_id']);
   const templateVars = {
-    urls: urlDatabase,
+    urls,
     userID: req.cookies['user_id'],
     user: users[req.cookies['user_id']],
   };
-  console.log(users[req.cookies['user_id']]);
-  res.render('urls_index', templateVars);
+  if (!req.cookies['user_id']) {
+    res.status(400).send('Please login or create an account.');
+  } else {
+    res.render('urls_index', templateVars);
+  }
 });
 
 app.get('/urls/new', (req, res) => {
@@ -156,47 +191,68 @@ app.get('/urls/new', (req, res) => {
     userID: req.cookies['user_id'],
     user: users[req.cookies['user_id']],
   };
-  if (templateVars.user) {
-    res.render('urls_new', templateVars);
+  if (!req.cookies['user_id']) {
+    res.status(400).send('Please login or create an account.');
   } else {
-    res.redirect('/login');
+    res.render('urls_new', templateVars);
   }
 });
 
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
+    urls: urlDatabase,
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL.longURL],
     userID: req.cookies['user_id'],
     user: users[req.cookies['user_id']],
   };
-  res.render('urls_show', templateVars);
+  if (urlDatabase[req.params.shortURL].userID === req.cookies['user_id']) {
+    res.render('urls_show', templateVars);
+  } else {
+    res.status(400).send('You can only view this URL if you created it!');
+  }
 });
 
 app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(400).send('This URL does not exist!');
+  } else {
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  }
 });
 
 // POST request, adds the longURL and shortURL to our database object
 app.post('/urls', (req, res) => {
+  const userID = req.cookies['user_id'];
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = {};
+  urlDatabase[shortURL].longURL = longURL;
+  urlDatabase[shortURL].userID = userID;
   res.redirect(`/urls/${shortURL}`);
+  console.log(urlDatabase);
 });
 
 // POST request, deletes longURL and shortURL from our database object
 app.post('/urls/:shortURL/delete', (req, res) => {
   const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
-  res.redirect('/urls');
+  if (urlDatabase[shortURL].userID === req.cookies['user_id']) {
+    delete urlDatabase[shortURL];
+    res.redirect('/urls');
+  } else {
+    res.status(400).send('You cannot delete this URL unless you generated it!');
+  }
 });
 
-// takes user to longURL when visiting shortURL
+// Edit URL
 app.post('/urls/:shortURL', (req, res) => {
-  const longURL = req.body.longURL;
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = longURL;
-  res.redirect(`/urls/${shortURL}`);
+  const longURL = req.body.longURL;
+  if (urlDatabase[shortURL].userID === req.cookies['user_id']) {
+    urlDatabase[shortURL].longURL = longURL;
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.status(400).send('You cannot edit this URL unless you generated it!');
+  }
 });
