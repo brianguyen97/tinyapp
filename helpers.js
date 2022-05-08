@@ -4,21 +4,14 @@ const generateRandomString = () => {
 };
 
 // Create a new user
-const createNewUser = (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  if (!email || !password) {
-    res.status(400).send('Email and password cannot be empty');
-  } else {
-    const id = generateRandomString();
-    users[id] = {
-      id,
-      email,
-      hashedPassword,
-    };
-    return users[id];
-  }
+const createNewUser = (email, hashedPassword, database) => {
+  const id = generateRandomString();
+  database[id] = {
+    id,
+    email,
+    hashedPassword,
+  };
+  return database[id];
 };
 
 // Check If User Exists
@@ -40,10 +33,28 @@ const urlsForUser = userid => {
   return accumulator;
 };
 
+// URL Database
+const urlDatabase = {
+  i3BoGr: {
+    longURL: 'https://www.google.ca',
+    userID: 'billieEilish',
+  },
+};
+
+// Users Database
+const users = {
+  billieEilish: {
+    id: 'billieEilish',
+    email: 'billieEilish@gmail.com',
+    password: 'blohsh',
+  },
+};
+
 module.exports = {
-  urlDatabase,
   getUserByEmail,
   generateRandomString,
   createNewUser,
   urlsForUser,
+  urlDatabase,
+  users,
 };
