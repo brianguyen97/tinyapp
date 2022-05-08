@@ -6,6 +6,13 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
+const {
+  urlDatabase,
+  getUserByEmail,
+  generateRandomString,
+  createNewUser,
+  urlsForUser,
+} = require('./helpers');
 
 app.use(
   cookieSession({
@@ -65,18 +72,12 @@ const createNewUser = (req, res) => {
 };
 
 // Check If User Exists
-const checkIfUserExists = email => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return users[user];
-    }
+const getUserByEmail = (email, database) => {
+  for (let user in database) {
+    if (database[user].email === email) return database[user];
   }
   return false;
 };
-
-// Verify Password
-const verifyPassword = (user, password) =>
-  bcrypt.compareSync(password, user.hashedPassword);
 
 // fetch urls by user ID
 const urlsForUser = userid => {
@@ -100,7 +101,7 @@ app.get('/register', (req, res) => {
 
 // register post
 app.post('/register', (req, res) => {
-  const exists = checkIfUserExists(req.body.email);
+  const exists = getUserByEmail(req.body.email, users);
   if (exists) {
     res.status(400).send('Email is already in use.');
   } else {
@@ -122,7 +123,7 @@ app.get('/login', (req, res) => {
 // login
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const user = checkIfUserExists(email);
+  const user = getUserByEmail(req.body.email, users);
   const hashedPassword = bcrypt.hashSync(password, 10);
   const result = bcrypt.compareSync(password, hashedPassword);
   if (user) {
