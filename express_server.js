@@ -1,17 +1,17 @@
 // Requirements
 const express = require('express');
 const app = express();
-const PORT = 8080;
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
 const {
-  urlDatabase,
   getUserByEmail,
   generateRandomString,
   createNewUser,
   urlsForUser,
+  urlDatabase,
+  users,
 } = require('./helpers');
 
 app.use(
@@ -26,69 +26,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
 app.listen(8080, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log('Listening on Port 8080!');
 });
 
-// URL Database
-const urlDatabase = {
-  i3BoGr: {
-    longURL: 'https://www.google.ca',
-    userID: 'billieEilish',
-  },
-};
-
-// Users Database
-const users = {
-  billieEilish: {
-    id: 'billieEilish',
-    email: 'billieEilish@gmail.com',
-    password: 'blohsh',
-  },
-};
-
-// Helper Functions
-
-// Generate random string for urls and user ids
-const generateRandomString = () => {
-  return Math.random().toString(36).slice(2, 8);
-};
-
-// Create a new user
-const createNewUser = (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  if (!email || !password) {
-    res.status(400).send('Email and password cannot be empty');
-  } else {
-    const id = generateRandomString();
-    users[id] = {
-      id,
-      email,
-      hashedPassword,
-    };
-    return users[id];
-  }
-};
-
-// Check If User Exists
-const getUserByEmail = (email, database) => {
-  for (let user in database) {
-    if (database[user].email === email) return database[user];
-  }
-  return false;
-};
-
-// fetch urls by user ID
-const urlsForUser = userid => {
-  let accumulator = {};
-  for (url in urlDatabase) {
-    if (urlDatabase[url].userID === userid) {
-      accumulator[url] = urlDatabase[url];
-    }
-  }
-  return accumulator;
-};
+app.get('/', (req, res) => {
+  res.redirect('/urls');
+});
 
 // register page
 app.get('/register', (req, res) => {
@@ -105,7 +48,9 @@ app.post('/register', (req, res) => {
   if (exists) {
     res.status(400).send('Email is already in use.');
   } else {
-    const newUser = createNewUser(req, res);
+    const { email, password } = req.body;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    const newUser = createNewUser(email, hashedPassword, users);
     req.session.user_id = newUser.id;
     res.redirect('/urls');
   }
@@ -120,12 +65,14 @@ app.get('/login', (req, res) => {
   res.render('login', templateVars);
 });
 
-// login
+// login post
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   const user = getUserByEmail(req.body.email, users);
   const hashedPassword = bcrypt.hashSync(password, 10);
   const result = bcrypt.compareSync(password, hashedPassword);
+  if (!password || !email)
+    res.status(403).send('Email and Password cannot be blank.');
   if (user) {
     if (result) {
       req.session.user_id = user.id;
@@ -148,6 +95,7 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
+// urls page
 app.get('/urls', (req, res) => {
   const urls = urlsForUser(req.session.user_id);
   const templateVars = {
@@ -162,6 +110,7 @@ app.get('/urls', (req, res) => {
   }
 });
 
+// create new url
 app.get('/urls/new', (req, res) => {
   const templateVars = {
     userID: req.session.user_id,
@@ -200,7 +149,7 @@ app.get('/u/:shortURL', (req, res) => {
 
 // POST request, adds the longURL and shortURL to our database object
 app.post('/urls', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = {};
