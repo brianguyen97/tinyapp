@@ -4,13 +4,12 @@ const app = express();
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
+const { urlDatabase, users } = require('./database');
 const {
   getUserByEmail,
   generateRandomString,
   createNewUser,
   urlsForUser,
-  urlDatabase,
-  users,
 } = require('./helpers');
 
 app.use(
