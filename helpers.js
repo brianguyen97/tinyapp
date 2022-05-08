@@ -35,17 +35,9 @@ const urlsForUser = userid => {
   return accumulator;
 };
 
-// URL Database
-const urlDatabase = {};
-
-// Users Database
-const users = {};
-
 module.exports = {
   getUserByEmail,
   generateRandomString,
   createNewUser,
   urlsForUser,
-  urlDatabase,
-  users,
 };
