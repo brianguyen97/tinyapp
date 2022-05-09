@@ -4,6 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
+const PORT = 8080;
 const { urlDatabase, users } = require('./database');
 const {
   getUserByEmail,
@@ -21,8 +22,6 @@ app.use(
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
-
-app.listen(8080, () => {});
 
 app.get('/', (req, res) => {
   res.redirect('/urls');
@@ -177,4 +176,8 @@ app.post('/urls/:shortURL', (req, res) => {
   } else {
     res.status(400).send('You cannot edit this URL unless you generated it!');
   }
+});
+
+app.listen(8080, () => {
+  console.log(`Listening on Port ${PORT}`);
 });
