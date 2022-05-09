@@ -1,3 +1,5 @@
+const { urlDatabase } = require('./helpers');
+
 // Generate and returns a random string. Used for URLs and User IDS. No parameters needed to be passed in.
 const generateRandomString = () => {
   return Math.random().toString(36).slice(2, 8);
