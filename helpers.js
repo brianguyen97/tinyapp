@@ -1,4 +1,4 @@
-const { urlDatabase } = require('./helpers');
+const { urlDatabase, users } = require('./database');
 
 // Generate and returns a random string. Used for URLs and User IDS. No parameters needed to be passed in.
 const generateRandomString = () => {
