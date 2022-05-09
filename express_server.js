@@ -22,9 +22,7 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
-app.listen(8080, () => {
-  console.log('Listening on Port 8080!');
-});
+app.listen(8080, () => {});
 
 app.get('/', (req, res) => {
   res.redirect('/urls');
@@ -105,7 +103,6 @@ app.get('/urls', (req, res) => {
   if (!req.session.user_id) {
     res.status(400).send('Please login or create an account.');
   } else {
-    console.log(users);
     res.render('urls_index', templateVars);
   }
 });
