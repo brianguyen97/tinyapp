@@ -10,7 +10,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-localhost:8080/login
+localhost:8080/register
 !["Login Page"](https://github.com/brianguyen97/tinyapp/blob/main/docs/tinyApp3.jpg)
 
 localhost:8080/urls/new
